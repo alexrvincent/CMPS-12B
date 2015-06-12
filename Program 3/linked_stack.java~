@@ -1,0 +1,38 @@
+// $Id: linked_stack.java,v 1.1 2013-10-16 12:58:29-07 - - $
+//
+// NAME
+//    class linked_stack - implementation of stack
+//
+
+import java.util.NoSuchElementException;
+
+class linked_stack<item_t> {
+
+   private class node {
+      item_t value;
+      node link;
+   }
+
+   private node top = null;
+
+   public boolean empty() {
+      return top == null;
+   }
+
+   public item_t pop() { //returns a tree
+      if (empty()) {
+         throw new NoSuchElementException ("linked_stack.pop");
+      }
+      node temp = top; //temporary pointer
+      top = top.link; //move down the list
+      return temp.value; //get the tree that was popped off.
+   }
+
+   public void push (item_t value) {
+     node n = new node(); //make new node
+     n.value = value; //give new node that value
+     n.link = top; //have the new node's link point to the top of the stack
+     top = n; //have the new node become the new top
+   }
+
+}

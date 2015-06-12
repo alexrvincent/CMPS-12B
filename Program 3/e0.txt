@@ -1,0 +1,14 @@
+a:1.7
+b=aa+
+b=aa*
+b=aa/
+c=bb+
+d=cc*
+a:1
+b:2
+c:3
+d:44
+e=ab*cd*+ac/bd/-+
+e?
+a:10
+e?

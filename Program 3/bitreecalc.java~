@@ -1,0 +1,160 @@
+// $Id: bitreecalc.java,v 1.1 2013-10-16 12:58:29-07 - - $
+//NAME: ALEX VINCENT, USER: AVINCENT///////////
+
+import java.io.*;
+import java.util.Iterator;
+import java.util.Scanner;
+import java.util.NoSuchElementException;
+import static java.lang.System.*;
+
+class bitreecalc {
+  //Method: getVar - returns the first word in the line (the 
+  public static char getVar(String line){
+    Scanner scanLine = new Scanner(line);
+    while(scanLine.hasNextLine()){
+    String firstWord = scanLine.next();
+    try{
+      char variable = firstWord.charAt(0);
+      return variable;
+    }catch(Exception e){
+      err.println(e.getMessage());
+      break;
+      }
+    }
+    return ' ';
+  }
+
+  public static void doQuery(char op, char var, symbol_table table){
+    table.put(var, table.get_tree(var).eval(table), table.get_tree(var));
+    out.printf(var+": %g%n", table.get_tree(var).eval(table));
+    out.printf("   %s%n", table.get_tree(var));//Print the var's tree
+  }
+
+  public static void doAssign(char op, char var, double value, symbol_table table){
+    bitree t = new bitree(var);//Create leaf node tree
+    table.put(var,value,t);
+    out.printf(var+": "+value+"\n");
+    out.printf("   null\n");
+  }
+  
+  public static void doEquals(char var, symbol_table table, linked_stack stack, String line){
+    if(var == '+' || var == '-' || var == '*' || var == '/'){ //Case: operator
+      if(stack.empty()) {err.println("Stack Underflow"); return;}
+      bitree t = new bitree(var);
+      t.right = (bitree)stack.pop();
+      if(stack.empty()) {err.println("Stack Underflow"); return;}
+      t.left = (bitree)stack.pop(); 
+      stack.push(t); 
+      table.put(getVar(line), table.get_value(getVar(line)), t);
+    }
+    if(Character.isLetter(var)){ //Case: Variable
+      bitree t = new bitree(var);
+      stack.push(t);
+    }
+  }
+
+  public static void calculate(String line, symbol_table table, linked_stack stack, int linenum, String filename){
+    Scanner scanLine = new Scanner(line);
+//Case -- '=' operator
+    if(scanLine.findInLine("=") != null){
+      int equalsIndex = line.indexOf('='); //Get the index of the = in the line
+      String subLine = line.substring(equalsIndex+1); //create a smaller line
+      Scanner subScan = new Scanner(subLine); //make a scanner over that smaller line
+      while(subScan.hasNext()){//scan over the line
+        String subWord = subScan.next(); //read each word
+        for(int i = 0; i <subWord.length(); i++){//for every word in the line
+          doEquals(subWord.charAt(i), table, stack, line);
+          if(stack.empty()) break;
+        }
+      }
+      table.put(getVar(line), table.get_tree(getVar(line)).eval(table), table.get_tree(getVar(line)));
+      out.print(getVar(line)+": "+table.get_value(getVar(line))+"\n");
+      out.printf("   %s%n", table.get_tree(getVar(line)));
+    }
+//Case -- ':' operator
+    else if(scanLine.findInLine(":") != null){
+      try{ 
+        double value = scanLine.nextDouble(); //Gets double in line
+        doAssign(':', getVar(line),value, table); //create tree, put var into table
+      }catch (Exception exep){
+        err.println("bitree: "+filename+": "+linenum+": number format exception");
+        //exit(1);
+      }
+    }
+//Case -- '?' operator
+    else if(scanLine.findInLine("\\?") != null){
+      doQuery('?', getVar(line), table); //print the value of the var and it's tree
+    }
+//Case -- New/Empty Line
+   else if(line.isEmpty()) out.print("");
+//Case - Syntax error
+   else {err.println("bitreecalc: "+ filename+": "+linenum+" syntax error"); return;}
+   }
+  
+  static void writefile (PrintStream writer, String[] args){
+    out.printf("writefile:%s%n", args[0]);
+    for(String arg: args)writer.printf("%s%n", arg);
+  }
+  
+   public static void main (String[] args) {
+     boolean e = false;
+     boolean o = false;
+     String outfile = "foo"; 
+     symbol_table table = new symbol_table(); //create new symbol table
+     linked_stack stack = new linked_stack(); //create a new stack
+     //Read from the keyboard
+     if (args.length == 0 || args[0].equals ("-")) {
+         Scanner scan = new Scanner(System.in);
+         int linenum = 1;
+         while(scan.hasNext()){
+           String line = scan.nextLine();
+           if(line != null && line.isEmpty() && !line.trim().isEmpty()) continue;
+           if(e) out.printf("**** %s\n", scan.nextLine()); 
+           calculate(line,table,stack,linenum, "STDIN");
+           linenum++;
+         }
+         table.print_table();
+         exit(0);
+     }
+     //Read from file
+     else{
+       for(int i = 0; i<args.length; i++){
+         String filename = args[i];
+         if(filename.equals("-e")) { 
+           e = true; //turn e on, move to next argument
+           continue;
+         }
+         if(filename.equals("-o")){
+           o = true; //turn o on
+           outfile = args[i+1]; //store the filename
+           i= i+1;
+           continue;
+         }
+         try{
+           
+           if(o) {
+             File file = new File(outfile);
+             PrintStream writer = new PrintStream(new FileOutputStream(file));
+             System.setOut(writer);
+           }
+           
+           Scanner scan = new Scanner(new File(filename));
+           int linenum = 1;
+           while(scan.hasNext()){
+             String line = scan.nextLine(); //Read the line
+             if(e) out.printf("**** %s\n", line); //Print the line
+             if(getVar(line) == '#') {continue;}
+             calculate(line,table,stack,linenum,filename);
+             linenum++;
+             }
+         }catch (FileNotFoundException exc){
+           err.println(exc.getMessage());
+           exit(1);
+         }
+       }
+     }
+     table.print_table();
+     exit(0);
+   }
+
+}

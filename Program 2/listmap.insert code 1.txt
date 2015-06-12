@@ -1,0 +1,27 @@
+iterator listIter = new iterator();
+      //out.print(listIter.curr);
+      //node prev = listIter.curr;
+      while(listIter.hasNext()){
+        out.println("Does this even have a next?");
+        if(key.compareTo(listIter.curr.getKey()) == 0){ break;
+        }
+        //else if(key.compareTo(listIter.curr.getKey()) < 0){
+         // node newNode = new node();
+         // newNode.key = key;
+          //prev.link = newNode;
+         // newNode.link = listIter.curr;
+        //  break;
+       // }
+       // else if(key.compareTo(listIter.curr.getKey()) > 0){
+        //  node newNode = new node();
+         // newNode.key = key;
+        //  listIter.curr.link = newNode;
+          //newNode.link = listIter.next().get;
+        //  break;
+       // }
+        else{
+          //prev = listIter.curr;
+          listIter.next();
+        }
+      }
+      out.println("Insert is done");

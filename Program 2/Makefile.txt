@@ -1,0 +1,32 @@
+JAVASRC = jxref.java intqueue.java listmap.java misc.java
+SOURCES = README Makefile ${JAVASRC}
+MAINCLASS = jxref
+CLASSES = jxref.class intqueue.class listmap.class misc.class
+JARFILE = jxref
+JARCLASSES = ${CLASSES}
+
+all:${JARFILE}
+
+${JARFILE}: ${CLASSES}
+	echo Main-class: ${MAINCLASS} >Manifest
+	jar cvfm ${JARFILE} Manifest ${JARCLASSES}
+	- rm Manifest
+	chmod +x ${JARFILE}
+
+%.class: %.java
+	cid + $<
+	javac $<
+
+clean:
+	- rm ${CLASSES} test.output
+
+spotless: clean
+	- rm ${JARFILE}
+	-ls -ago
+
+ci: ${SOURCES}
+	cid + ${SOURCES}
+
+check: ${SOURCES}
+	- checksource ${SOURCES}
+

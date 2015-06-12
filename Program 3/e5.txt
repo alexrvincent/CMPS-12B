@@ -1,0 +1,9 @@
+hello there
+h=hello
+y=hello++++++++++++++
+z=hello!@#$%^&*()_+|~
+r:foobar
+u
+x=aabb*
+3.1415926535
+p:MCMLXIV
